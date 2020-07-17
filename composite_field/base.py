@@ -150,7 +150,13 @@ class CompositeField(object, metaclass=CompositeFieldBase):
 
         def _set(self, values):
             if isinstance(values, dict):
-                for name in self._composite_field:
+                extra_keys = set(values.keys()) - set(self._composite_field)
+                if extra_keys:
+                    raise AttributeError('%r has no attribute %r' % (
+                        self._composite_field.__class__.__name__, extra_keys
+                    ))
+
+                for name in [x for x in self._composite_field if x in values.keys()]:
                     subfield_name = self._composite_field.prefix + name
                     setattr(self._model, subfield_name, values[name])
             else:
